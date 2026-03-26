@@ -1,0 +1,46 @@
+{
+  "guestVisibility": {
+    "/": true,
+    "/ideas": true
+  },
+  "ranker": {
+    "criteria": [
+      {
+        "id": "interest",
+        "label": "Interest",
+        "weight": 3,
+        "invert": false
+      },
+      {
+        "id": "feasibility",
+        "label": "Feasibility",
+        "weight": 1,
+        "invert": false
+      },
+      {
+        "id": "time_to_build",
+        "label": "Time to Build",
+        "weight": 1,
+        "invert": true
+      },
+      {
+        "id": "learning_value",
+        "label": "Learning Value",
+        "weight": 2,
+        "invert": false
+      },
+      {
+        "id": "impact",
+        "label": "Impact",
+        "weight": 2,
+        "invert": false
+      },
+      {
+        "id": "originality",
+        "label": "Originality",
+        "weight": 1,
+        "invert": false
+      }
+    ]
+  }
+}
