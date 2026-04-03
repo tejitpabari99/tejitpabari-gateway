@@ -36,9 +36,6 @@
         </svg>
       </a>
     {/if}
-    {#if data.role === 'guest'}
-      <span class="guest-badge">Guest</span>
-    {/if}
     <button class="icon-link theme-toggle" onclick={toggleTheme} title="Toggle theme" aria-label="Toggle theme">
       {#if dark}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
@@ -50,7 +47,9 @@
         </svg>
       {/if}
     </button>
-    <a href="/logout" class="logout">Logout</a>
+    {#if data.role === 'admin'}
+      <a href="/logout" class="logout">Logout</a>
+    {/if}
   </div>
 </header>
 {/if}
@@ -160,15 +159,6 @@
   .icon-link { color: var(--muted); display: flex; align-items: center; transition: color 0.15s; background: none; border: none; cursor: pointer; padding: 0; }
   .icon-link:hover { color: var(--fg); }
   .icon-link svg { width: 18px; height: 18px; }
-  .guest-badge {
-    font-size: 0.72rem;
-    padding: 0.15rem 0.55rem;
-    border-radius: 20px;
-    background: var(--icon-bg);
-    color: var(--muted);
-    border: 1px solid var(--card-border);
-    font-weight: 500;
-  }
   .logout { font-size: 0.78rem; color: var(--muted); text-decoration: underline; }
   .logout:hover { color: var(--fg); }
   .admin-link {
