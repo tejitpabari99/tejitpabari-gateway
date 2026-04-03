@@ -30,7 +30,7 @@ export function getLink(slug) {
   return links.find(l => l.slug.toLowerCase() === slug.toLowerCase()) || null;
 }
 
-export function saveLink({ slug, url, tags, expiresAt, redirectType, existingSlug }) {
+export function saveLink({ slug, url, tags, description, expiresAt, redirectType, existingSlug }) {
   const links = readLinks();
   const normalizedSlug = slug.toLowerCase();
   const normalizedTags = titleCaseTags(tags);
@@ -51,6 +51,7 @@ export function saveLink({ slug, url, tags, expiresAt, redirectType, existingSlu
       slug: normalizedSlug,
       url,
       tags: normalizedTags,
+      description: description !== undefined ? description : (links[idx].description || ''),
       expiresAt: expiresAt || null,
       redirectType: redirectType || '302',
     };
@@ -60,6 +61,7 @@ export function saveLink({ slug, url, tags, expiresAt, redirectType, existingSlu
       slug: normalizedSlug,
       url,
       tags: normalizedTags,
+      description: description || '',
       created: today,
       clicks: 0,
       lastClicked: null,

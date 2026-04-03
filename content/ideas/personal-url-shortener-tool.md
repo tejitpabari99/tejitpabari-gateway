@@ -1,10 +1,10 @@
 ---
 date: 2026-03-26T00:00:00.000Z
 title: Personal URL Shortener Tool
-status: new
+status: completed
 tags:
   - Personal
-link: ''
+link: 'https://go.tejitpabari.com/'
 brief: >-
   A self-hosted Bitly-style URL shortener running on tejitpabari.com. Paste in
   URLs in bulk and generate personal short links that auto-redirect.
@@ -16,7 +16,8 @@ scores:
   impact: 2
   originality: 1
   interest: 3
-github: ''
+github: >-
+  https://github.com/tejitpabari99/tejitpabari-gateway/tree/main/src/routes/links
 ---
 ## Overview
 A personal URL shortener hosted on my own domain (tejitpabari.com), similar to Bitly, but for personal use.

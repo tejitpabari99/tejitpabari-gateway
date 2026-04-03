@@ -1,7 +1,7 @@
 ---
-date: 2026-03-26
+date: 2026-03-26T00:00:00.000Z
 title: Hospital Bill Checker
-status: new
+status: inprogress
 tags: []
 link: ''
 ranked: true
@@ -11,6 +11,7 @@ scores:
   learning_value: 4
   impact: 5
   originality: 3
+  interest: 4
 github: ''
 brief: ''
 ---

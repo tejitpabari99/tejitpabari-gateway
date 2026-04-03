@@ -8,7 +8,7 @@
   <p class="page-title">Projects</p>
   <p class="page-sub">Personal tools and dashboards.</p>
   <div class="grid">
-    {#if data.role === 'admin'}
+    {#if data.role === 'admin' || data.guestVisibility['/dashboard']}
     <a class="card" href="/dashboard">
       <div class="card-header">
         <div class="card-icon">

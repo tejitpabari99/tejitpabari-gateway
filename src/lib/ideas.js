@@ -29,7 +29,7 @@ export function listIdeas() {
       brief: data.brief || '',
       ranked: data.ranked ?? false,
       scores: (typeof data.scores === 'object' && data.scores !== null) ? data.scores : {},
-      date: data.date ? String(data.date).slice(0, 10) : '',
+      date: data.date ? (data.date instanceof Date ? data.date.toISOString().slice(0, 10) : String(data.date).slice(0, 10)) : '',
     };
   }).sort((a, b) => {
     if (!a.date && !b.date) return a.title.localeCompare(b.title);
@@ -56,7 +56,7 @@ export function getIdea(slug) {
       brief: data.brief || '',
       ranked: data.ranked ?? false,
       scores: (typeof data.scores === 'object' && data.scores !== null) ? data.scores : {},
-      date: data.date ? String(data.date).slice(0, 10) : '',
+      date: data.date ? (data.date instanceof Date ? data.date.toISOString().slice(0, 10) : String(data.date).slice(0, 10)) : '',
     };
   } catch {
     return null;

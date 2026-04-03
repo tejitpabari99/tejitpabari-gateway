@@ -6,8 +6,21 @@
       "Meet"
     ],
     "created": "2026-03-26",
-    "clicks": 2,
-    "lastClicked": "2026-03-26T21:29:35.216Z",
+    "clicks": 3,
+    "lastClicked": "2026-03-28T09:46:47.746Z",
+    "expiresAt": null,
+    "redirectType": "302"
+  },
+  {
+    "slug": "meet-full",
+    "url": "https://cal.com/tejitpabari/meet-full",
+    "tags": [
+      "Meet"
+    ],
+    "description": "",
+    "created": "2026-03-27",
+    "clicks": 0,
+    "lastClicked": null,
     "expiresAt": null,
     "redirectType": "302"
   }
