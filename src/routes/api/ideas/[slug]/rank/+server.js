@@ -1,9 +1,12 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { getIdea } from '$lib/ideas.js';
 import { readCriteria } from '$lib/settings.js';
 import { json } from '@sveltejs/kit';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import {
+  anthropicConfigError,
+  createAnthropicClient,
+  DEFAULT_ANTHROPIC_MODEL,
+  formatAnthropicError
+} from '$lib/anthropic.js';
 
 export async function POST({ params, locals }) {
   if (locals.role !== 'admin') return json({ error: 'Forbidden' }, { status: 403 });
@@ -17,12 +20,18 @@ export async function POST({ params, locals }) {
 
   const criteriaList = rankable.map(c => `- ${c.label}${c.invert ? ' (lower is better — score the raw difficulty, not inverted)' : ''}: id="${c.id}"`).join('\n');
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    messages: [{
-      role: 'user',
-      content: `You are scoring a software/product project idea across evaluation criteria. Score each criterion from 1 (worst) to 5 (best). Use the full range — don't default to middle scores.
+  const configError = anthropicConfigError();
+  if (configError) return json({ error: configError }, { status: 500 });
+
+  let message;
+  try {
+    const client = createAnthropicClient();
+    message = await client.messages.create({
+      model: DEFAULT_ANTHROPIC_MODEL,
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: `You are scoring a software/product project idea across evaluation criteria. Score each criterion from 1 (worst) to 5 (best). Use the full range — don't default to middle scores.
 
 Criteria to score:
 ${criteriaList}
@@ -38,8 +47,11 @@ Return ONLY a JSON object with this exact shape (no markdown, no explanation out
   "scores": {${rankable.map(c => `"${c.id}": <1-5>`).join(', ')}},
   "analysis": "2-3 sentences explaining your reasoning for the key scores"
 }`
-    }]
-  });
+      }]
+    });
+  } catch (error) {
+    return json({ error: formatAnthropicError(error) }, { status: 502 });
+  }
 
   const raw = message.content[0].text.trim();
   let parsed;

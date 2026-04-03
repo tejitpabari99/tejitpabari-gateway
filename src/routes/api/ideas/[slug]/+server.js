@@ -1,9 +1,12 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { getIdea, saveIdeaMeta, saveIdeaContent } from '$lib/ideas.js';
 import { marked } from 'marked';
 import { json } from '@sveltejs/kit';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import {
+  anthropicConfigError,
+  createAnthropicClient,
+  DEFAULT_ANTHROPIC_MODEL,
+  formatAnthropicError
+} from '$lib/anthropic.js';
 
 export async function PATCH({ request, params, locals }) {
   if (locals.role !== 'admin') return json({ error: 'Forbidden' }, { status: 403 });
@@ -85,12 +88,18 @@ export async function POST({ request, params }) {
   const idea = getIdea(params.slug);
   if (!idea) return json({ error: 'Not found' }, { status: 404 });
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
-    messages: [{
-      role: 'user',
-      content: `You are helping expand a project idea. Below is the existing description and new notes added by the author.
+  const configError = anthropicConfigError();
+  if (configError) return json({ error: configError }, { status: 500 });
+
+  let message;
+  try {
+    const client = createAnthropicClient();
+    message = await client.messages.create({
+      model: DEFAULT_ANTHROPIC_MODEL,
+      max_tokens: 2048,
+      messages: [{
+        role: 'user',
+        content: `You are helping expand a project idea. Below is the existing description and new notes added by the author.
 
 Merge them into a single cohesive markdown document. Polish the English. Do NOT invent new content — only incorporate what is already written. Keep the existing structure where possible.
 
@@ -101,8 +110,11 @@ ${idea.content}
 
 New notes:
 ${newNotes}`
-    }]
-  });
+      }]
+    });
+  } catch (error) {
+    return json({ error: formatAnthropicError(error) }, { status: 502 });
+  }
 
   const content = message.content[0].text.trim();
   const html = await marked(content);

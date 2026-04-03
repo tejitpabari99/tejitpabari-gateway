@@ -1,8 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { saveIdeaContent } from '$lib/ideas.js';
 import { json } from '@sveltejs/kit';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import {
+  anthropicConfigError,
+  createAnthropicClient,
+  DEFAULT_ANTHROPIC_MODEL,
+  formatAnthropicError
+} from '$lib/anthropic.js';
 
 function slugify(title) {
   return title.toLowerCase()
@@ -30,12 +33,18 @@ export async function POST({ request, locals }) {
   const { rawText } = body;
   if (!rawText?.trim()) return json({ error: 'No text provided' }, { status: 400 });
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    messages: [{
-      role: 'user',
-      content: `You are helping organize project ideas. Given the following raw notes, do these things:
+  const configError = anthropicConfigError();
+  if (configError) return json({ error: configError }, { status: 500 });
+
+  let message;
+  try {
+    const client = createAnthropicClient();
+    message = await client.messages.create({
+      model: DEFAULT_ANTHROPIC_MODEL,
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: `You are helping organize project ideas. Given the following raw notes, do these things:
 1. Write a short, clear title (5 words max)
 2. Polish the English — fix grammar, clarity, flow. Do NOT add new ideas or content that wasn't already there.
 3. Structure it with markdown headings where logical (## Overview, ## Features, ## Notes, etc.)
@@ -47,8 +56,11 @@ Return ONLY a JSON object with this exact shape (no markdown, no explanation):
 
 Raw notes:
 ${rawText}`
-    }]
-  });
+      }]
+    });
+  } catch (error) {
+    return json({ error: formatAnthropicError(error) }, { status: 502 });
+  }
 
   const raw = message.content[0].text.trim();
   let parsed;
