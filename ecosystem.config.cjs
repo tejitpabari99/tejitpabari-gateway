@@ -20,7 +20,6 @@ module.exports = {
   apps: [{
     name: 'cc-gateway',
     script: 'build/index.js',
-    interpreter: '/root/.nvm/versions/node/v20.20.1/bin/node',
     env: { NODE_ENV: 'production', ...loadEnvFile('.env') }
   }]
 }
