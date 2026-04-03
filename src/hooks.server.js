@@ -50,9 +50,18 @@ export async function handle({ event, resolve }) {
 
   const path = event.url.pathname;
 
-  // Dashboard proxy — admin only
+  // Dashboard proxy — admin or allowed guest
   if (path.startsWith('/dashboard')) {
-    if (role !== 'admin') throw redirect(302, '/login');
+    if (role !== 'admin') {
+      if (role !== 'guest') throw redirect(302, '/login');
+      const settings = readSettings();
+      const guestAllowed = settings.guestVisibility?.['/dashboard'] === true;
+      if (!guestAllowed) throw redirect(302, '/login');
+      // Guests may only read
+      if (!['GET', 'HEAD'].includes(event.request.method)) {
+        return new Response('Forbidden', { status: 403 });
+      }
+    }
 
     const target = new URL(path + event.url.search, DASHBOARD_URL);
     const reqHeaders = new Headers(event.request.headers);

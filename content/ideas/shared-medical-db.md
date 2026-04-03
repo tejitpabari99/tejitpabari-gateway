@@ -1,5 +1,5 @@
 ---
-date: 2026-03-26
+date: 2026-03-26T00:00:00.000Z
 title: Shared Medical DB
 status: new
 tags: []
@@ -7,10 +7,10 @@ link: ''
 ranked: true
 scores:
   feasibility: 1
-  time_to_build: 1
-  learning_value: 4
+  time_to_build: 5
+  learning_value: 5
   impact: 5
-  originality: 2
+  originality: 3
 github: ''
 brief: ''
 ---

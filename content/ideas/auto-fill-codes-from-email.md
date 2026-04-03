@@ -1,5 +1,5 @@
 ---
-date: 2026-03-26
+date: 2026-03-26T00:00:00.000Z
 title: Auto-Fill Codes From Email
 status: new
 tags:
@@ -18,7 +18,7 @@ scores:
   learning_value: 4
   impact: 3
   originality: 3
-  interest: 2
+  interest: 4
 github: ''
 ---
 ## Overview

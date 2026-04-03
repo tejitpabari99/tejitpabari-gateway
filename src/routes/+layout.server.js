@@ -1,3 +1,6 @@
+import { readSettings } from '$lib/settings.js';
+
 export function load({ locals }) {
-  return { role: locals.role };
+  const settings = readSettings();
+  return { role: locals.role, guestVisibility: settings.guestVisibility || {} };
 }
