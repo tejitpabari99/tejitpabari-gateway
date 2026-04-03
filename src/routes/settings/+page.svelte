@@ -5,7 +5,6 @@
     { path: '/', label: 'Home' },
     { path: '/ideas', label: 'Ideas' },
     { path: '/links', label: 'Links' },
-    { path: '/dashboard', label: 'Dashboard' },
   ];
 
   import { onMount } from 'svelte';

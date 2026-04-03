@@ -6,23 +6,9 @@
 
 <main>
   <p class="page-title">Projects</p>
-  <p class="page-sub">Personal tools and dashboards.</p>
+  <p class="page-sub">Personal tools.</p>
   <div class="grid">
-    {#if data.role === 'admin' || data.guestVisibility['/dashboard']}
-    <a class="card" href="/dashboard">
-      <div class="card-header">
-        <div class="card-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19h8M4 17l6-6-6-6"/>
-          </svg>
-        </div>
-        <span class="card-name">Claude Code Dashboard</span>
-      </div>
-      <p class="card-desc">Usage analytics — sessions, token costs, projects, and model breakdowns from your local ~/.claude/ data.</p>
-      <span class="card-tag">analytics</span>
-    </a>
-    {/if}
-<a class="card" href="/ideas">
+    <a class="card" href="/ideas">
       <div class="card-header">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">

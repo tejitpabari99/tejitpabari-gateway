@@ -2,8 +2,7 @@
   "guestVisibility": {
     "/": true,
     "/ideas": true,
-    "/links": true,
-    "/dashboard": true
+    "/links": true
   },
   "ranker": {
     "criteria": [

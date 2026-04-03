@@ -18,7 +18,7 @@ export const actions = {
     const settings = readSettings();
 
     // Pages we manage visibility for
-    const pages = ['/', '/ideas', '/links', '/dashboard'];
+    const pages = ['/', '/ideas', '/links'];
     const guestVisibility = {};
     for (const page of pages) {
       guestVisibility[page] = data.get(`page_${page.replace('/', '_')}`) === 'on';

@@ -4,7 +4,6 @@ import { readSettings } from '$lib/settings.js';
 import { getLink, recordClick } from '$lib/links.js';
 
 const PUBLIC_PATHS = ['/login'];
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'http://localhost:3001';
 
 export async function handle({ event, resolve }) {
   // go.tejitpabari.com redirect engine — must be first, redirects are public
@@ -49,36 +48,6 @@ export async function handle({ event, resolve }) {
   event.locals.role = role;
 
   const path = event.url.pathname;
-
-  // Dashboard proxy — admin or allowed guest
-  if (path.startsWith('/dashboard')) {
-    if (role !== 'admin') {
-      if (role !== 'guest') throw redirect(302, '/login');
-      const settings = readSettings();
-      const guestAllowed = settings.guestVisibility?.['/dashboard'] === true;
-      if (!guestAllowed) throw redirect(302, '/login');
-      // Guests may only read
-      if (!['GET', 'HEAD'].includes(event.request.method)) {
-        return new Response('Forbidden', { status: 403 });
-      }
-    }
-
-    const target = new URL(path + event.url.search, DASHBOARD_URL);
-    const reqHeaders = new Headers(event.request.headers);
-    reqHeaders.delete('host');
-
-    try {
-      const response = await fetch(target.toString(), {
-        method: event.request.method,
-        headers: reqHeaders,
-        body: ['GET', 'HEAD'].includes(event.request.method) ? undefined : event.request.body,
-        .../** @type {any} */({ duplex: 'half' }),
-      });
-      return response;
-    } catch (e) {
-      return new Response('Dashboard unavailable', { status: 502 });
-    }
-  }
 
   // Public paths
   if (PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'))) {
