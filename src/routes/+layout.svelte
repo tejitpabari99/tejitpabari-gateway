@@ -25,6 +25,9 @@
 <header>
   <a href="/" class="brand">cc.tejitpabari.com</a>
   <div class="header-right">
+    {#if data.role === 'guest'}
+      <a href="/login" class="admin-link">Admin</a>
+    {/if}
     {#if data.role === 'admin'}
       <a href="/settings#guest-visibility" class="icon-link" title="Settings — Guest Visibility">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
@@ -168,4 +171,18 @@
   }
   .logout { font-size: 0.78rem; color: var(--muted); text-decoration: underline; }
   .logout:hover { color: var(--fg); }
+  .admin-link {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .admin-link:hover {
+    color: var(--fg);
+    border-color: var(--card-hover-border);
+    background: var(--card-hover-bg);
+  }
 </style>

@@ -18,16 +18,5 @@ export const actions = {
     });
 
     throw redirect(302, '/');
-  },
-
-  guest: async ({ cookies }) => {
-    cookies.set('cc_session', signRole('guest'), {
-      path: '/',
-      httpOnly: true,
-      maxAge: 365 * 24 * 60 * 60,
-      sameSite: 'lax'
-    });
-
-    throw redirect(302, '/');
   }
 };

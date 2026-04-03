@@ -51,7 +51,7 @@ export async function handle({ event, resolve }) {
 
   // cc-gateway auth logic
   const sessionCookie = event.cookies.get('cc_session');
-  const role = verifySession(sessionCookie);
+  const role = verifySession(sessionCookie) || 'guest';
   event.locals.role = role;
 
   const path = event.url.pathname;
@@ -63,11 +63,6 @@ export async function handle({ event, resolve }) {
   }
 
   // Require login for everything else
-  if (!role) {
-    if (isApiRequest) return jsonError(401, 'Unauthorized');
-    throw redirect(302, '/login');
-  }
-
   // Guest visibility check
   if (role === 'guest') {
     const settings = readSettings();

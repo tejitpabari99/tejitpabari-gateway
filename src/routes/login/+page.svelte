@@ -7,7 +7,7 @@
 <div class="wrap">
   <div class="card">
     <h1>cc.tejitpabari.com</h1>
-    <p class="subtitle">Enter password to continue</p>
+    <p class="subtitle">Enter password to continue as admin</p>
 
     {#if form?.error}
       <p class="error">{form.error}</p>
@@ -16,13 +16,7 @@
     <form method="POST" action="?/login">
       <label for="password">Password</label>
       <input type="password" id="password" name="password" autofocus required />
-      <button type="submit">Continue</button>
-    </form>
-
-    <div class="divider">or</div>
-
-    <form method="POST" action="?/guest">
-      <button type="submit" class="guest-btn">Continue as Guest</button>
+      <button type="submit">Login as Admin</button>
     </form>
   </div>
 </div>
@@ -77,27 +71,4 @@
     transition: opacity 0.15s;
   }
   button:hover { opacity: 0.85; }
-  .divider {
-    text-align: center;
-    color: #444;
-    font-size: 0.8rem;
-    margin: 1rem 0;
-    position: relative;
-  }
-  .divider::before, .divider::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 42%;
-    height: 1px;
-    background: #222;
-  }
-  .divider::before { left: 0; }
-  .divider::after { right: 0; }
-  .guest-btn {
-    background: transparent;
-    color: #888;
-    border: 1px solid #333;
-  }
-  .guest-btn:hover { color: #bbb; border-color: #555; opacity: 1; }
 </style>
