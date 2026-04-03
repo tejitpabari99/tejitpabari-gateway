@@ -5,6 +5,13 @@ import { getLink, recordClick } from '$lib/links.js';
 
 const PUBLIC_PATHS = ['/login'];
 
+function jsonError(status, error) {
+  return new Response(JSON.stringify({ error }), {
+    status,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
 export async function handle({ event, resolve }) {
   // go.tejitpabari.com redirect engine — must be first, redirects are public
   const host = event.request.headers.get('host') || '';
@@ -48,6 +55,7 @@ export async function handle({ event, resolve }) {
   event.locals.role = role;
 
   const path = event.url.pathname;
+  const isApiRequest = path === '/api' || path.startsWith('/api/');
 
   // Public paths
   if (PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'))) {
@@ -55,14 +63,20 @@ export async function handle({ event, resolve }) {
   }
 
   // Require login for everything else
-  if (!role) throw redirect(302, '/login');
+  if (!role) {
+    if (isApiRequest) return jsonError(401, 'Unauthorized');
+    throw redirect(302, '/login');
+  }
 
   // Guest visibility check
   if (role === 'guest') {
     const settings = readSettings();
     const allowedByPrefix = Object.entries(settings.guestVisibility || {})
       .some(([p, v]) => v === true && (path === p || path.startsWith(p + '/')));
-    if (!allowedByPrefix) throw redirect(302, '/login');
+    if (!allowedByPrefix) {
+      if (isApiRequest) return jsonError(403, 'Forbidden');
+      throw redirect(302, '/login');
+    }
   }
 
   return resolve(event);
