@@ -20,6 +20,7 @@ module.exports = {
   apps: [{
     name: 'cc-gateway',
     script: 'build/index.js',
+    cwd: __dirname,
     env: { NODE_ENV: 'production', ...loadEnvFile('.env') }
   }]
 }

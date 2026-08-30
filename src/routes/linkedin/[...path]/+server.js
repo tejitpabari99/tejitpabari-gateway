@@ -1,5 +1,16 @@
 import { error } from '@sveltejs/kit';
 
+// The upstream app sets kit.paths.base = '/linkedin', which means its own root route always
+// redirects bare "/linkedin" -> "/linkedin/" (a SvelteKit quirk: a non-empty base always needs
+// a trailing slash to match the root "/" route, independent of that app's trailingSlash
+// setting). cc-gateway's own default trailingSlash ('never') would otherwise intercept
+// "/linkedin/" and redirect it back to "/linkedin" *before* this handler ever runs, producing
+// an infinite redirect loop between the two routers. 'ignore' disables cc-gateway's own
+// trailing-slash canonicalization for this route so both forms reach proxy() untouched and the
+// upstream's own redirect (forwarded as-is, see `redirect: 'manual'` below) is what the browser
+// follows.
+export const trailingSlash = 'ignore';
+
 // Falls back to the app's default dev port if unset; production sets this in cc-gateway's .env
 // (mirrors the existing but currently-unused DASHBOARD_URL convention already in that file).
 const LINKEDIN_URL = process.env.LINKEDIN_URL || 'http://127.0.0.1:3003';
