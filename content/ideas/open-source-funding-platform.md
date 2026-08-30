@@ -18,8 +18,8 @@ scores:
   time_to_build: 5
   learning_value: 4
   impact: 3
-  originality: 2
-  interest: 5
+  originality: 3
+  interest: 1
 github: ''
 ---
 ## Overview

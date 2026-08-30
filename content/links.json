@@ -6,8 +6,8 @@
       "Meet"
     ],
     "created": "2026-03-26",
-    "clicks": 3,
-    "lastClicked": "2026-03-28T09:46:47.746Z",
+    "clicks": 58,
+    "lastClicked": "2026-08-30T00:55:05.224Z",
     "expiresAt": null,
     "redirectType": "302"
   },
@@ -19,8 +19,89 @@
     ],
     "description": "",
     "created": "2026-03-27",
-    "clicks": 0,
-    "lastClicked": null,
+    "clicks": 24,
+    "lastClicked": "2026-07-21T04:22:43.461Z",
+    "expiresAt": null,
+    "redirectType": "302"
+  },
+  {
+    "slug": "juno-speedrun-video",
+    "url": "https://drive.google.com/file/d/1c4EL2XpZtGN6cDHeIZQ1_YTZbcJIyqox/view?usp=sharing",
+    "tags": [
+      "Juno"
+    ],
+    "description": "",
+    "created": "2026-05-24",
+    "clicks": 4,
+    "lastClicked": "2026-05-26T10:23:23.313Z",
+    "expiresAt": null,
+    "redirectType": "302"
+  },
+  {
+    "slug": "ngo-auto-mailer",
+    "url": "https://script.google.com/macros/s/AKfycbweDGCMgVoZrLfUVFlZTw1OSXY0SmSvfFVO4Ul6gG2Wd4QEw23INw7C06GQpv6CdhT4/exec",
+    "tags": [
+      "Dev"
+    ],
+    "description": "",
+    "created": "2026-06-08",
+    "clicks": 6,
+    "lastClicked": "2026-08-28T17:17:14.289Z",
+    "expiresAt": null,
+    "redirectType": "302"
+  },
+  {
+    "slug": "ngo-auto-mailer-doc",
+    "url": "https://drive.google.com/file/d/1sSMl8vJzvxJTUtusIccLbjxlxT7wMBHp/view?usp=sharing",
+    "tags": [
+      "Dev"
+    ],
+    "description": "",
+    "created": "2026-06-08",
+    "clicks": 2,
+    "lastClicked": "2026-06-10T12:39:24.940Z",
+    "expiresAt": null,
+    "redirectType": "302"
+  },
+  {
+    "slug": "juno/founder/fred",
+    "url": "https://drive.google.com/file/d/1n5IYd6-bugb4Lj-azhsAtjdcvVmE6KoX/view?usp=sharing",
+    "tags": [
+      "Juno",
+      "Founder"
+    ],
+    "description": "",
+    "created": "2026-06-13",
+    "clicks": 7,
+    "lastClicked": "2026-07-14T12:49:08.421Z",
+    "expiresAt": null,
+    "redirectType": "302"
+  },
+  {
+    "slug": "juno/pitch-deck",
+    "url": "https://drive.google.com/file/d/1DP-Lj5qDUSRGUPur3Sml5qZQJ9chcAbM/view?usp=drive_link",
+    "tags": [
+      "Juno",
+      "Deck"
+    ],
+    "description": "",
+    "created": "2026-06-13",
+    "clicks": 40,
+    "lastClicked": "2026-08-27T05:35:04.891Z",
+    "expiresAt": null,
+    "redirectType": "302"
+  },
+  {
+    "slug": "juno/advisor/leavitt",
+    "url": "https://drive.google.com/file/d/18Bn8IzF7EnifHF5IYyacHtbLZkYmOX2j/view?usp=drive_link",
+    "tags": [
+      "Juno",
+      "Advisor"
+    ],
+    "description": "",
+    "created": "2026-06-13",
+    "clicks": 1,
+    "lastClicked": "2026-07-15T20:34:08.910Z",
     "expiresAt": null,
     "redirectType": "302"
   }

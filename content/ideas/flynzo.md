@@ -1,5 +1,5 @@
 ---
-date: 2026-03-26
+date: 2026-03-26T00:00:00.000Z
 title: Flynzo
 status: new
 tags: []
@@ -7,7 +7,7 @@ link: ''
 ranked: true
 scores:
   feasibility: 4
-  time_to_build: 3
+  time_to_build: 2
   learning_value: 4
   impact: 3
   originality: 3
