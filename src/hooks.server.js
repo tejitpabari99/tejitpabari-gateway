@@ -55,7 +55,9 @@ export async function handle({ event, resolve }) {
   event.locals.role = role;
 
   const path = event.url.pathname;
-  const isApiRequest = path === '/api' || path.startsWith('/api/');
+  const isApiRequest =
+    path === '/api' || path.startsWith('/api/') ||
+    path.startsWith('/linkedin/api/');
 
   // Public paths
   if (PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'))) {

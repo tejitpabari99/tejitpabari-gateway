@@ -17,3 +17,4 @@ Every feature on this site must support a guest read-only mode. Rules:
 - **API routes**: All mutating API endpoints (`POST`, `PATCH`, `PUT`, `DELETE`) must check `locals.role === 'admin'` and return 403 for guests. Read endpoints (`GET`) may allow guests.
 - **Dashboard proxy**: Guest access to `/dashboard` is GET-only; `POST`/`PATCH`/`PUT`/`DELETE` return 403.
 - **Settings**: Guest visibility per page is controlled at `/settings` (Guest Visibility section). New pages must be added to the `pages` array in both `+page.server.js` and `+page.svelte` of the settings route.
+- **Exception — `/linkedin`**: deliberately admin-only, no guest mode (LinkedIn Outreach Tool, D25). Do not add it to the settings `pages` array or `guestVisibility` map.
