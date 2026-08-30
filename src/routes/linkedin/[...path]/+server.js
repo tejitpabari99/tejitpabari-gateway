@@ -20,6 +20,22 @@ const HOP_BY_HOP = new Set([
   'te', 'trailers', 'transfer-encoding', 'upgrade', 'host'
 ]);
 
+// Node's fetch() transparently decompresses a gzip/br/deflate upstream response body (same as
+// browser fetch) but leaves the original, pre-decompression content-encoding/content-length
+// headers on the Response object it hands back. Forwarding those two headers as-is would tell
+// the browser "this body is still br-compressed, and is N (compressed) bytes long" when it is
+// actually already-decoded, differently-sized bytes -- the browser then fails to decode it (or
+// hangs/truncates on the length mismatch). Confirmed live against this app's own precompressed
+// _app/immutable/** assets (served with content-encoding: br). Strip both; the HTTP layer
+// recomputes a correct length (or uses chunked encoding) for the body actually being sent.
+const RESPONSE_ONLY_STRIP = new Set(['content-encoding', 'content-length']);
+
+// linkedin-outreach-tool has no auth of its own and never reads any cookie (grep confirms no
+// `cookie`/`cookies.get` usage anywhere in its src/) -- so cc-gateway's own cc_session cookie is
+// forwarded upstream for zero functional benefit, only unnecessary exposure of the (HMAC-signed)
+// session token to a second process/log stream. Stripped on the request side only.
+const REQUEST_ONLY_STRIP = new Set(['cookie']);
+
 function stripHopByHop(headers) {
   const h = new Headers(headers);
   for (const name of HOP_BY_HOP) h.delete(name);
@@ -39,6 +55,7 @@ async function proxy(event) {
 
   const upstreamUrl = new URL(event.url.pathname + event.url.search, LINKEDIN_URL);
   const headers = stripHopByHop(event.request.headers);
+  for (const name of REQUEST_ONLY_STRIP) headers.delete(name);
 
   const init = {
     method: event.request.method,
@@ -58,10 +75,13 @@ async function proxy(event) {
     throw error(502, 'linkedin-outreach-tool is unreachable');
   }
 
+  const responseHeaders = stripHopByHop(upstreamResponse.headers);
+  for (const name of RESPONSE_ONLY_STRIP) responseHeaders.delete(name);
+
   return new Response(upstreamResponse.body, {
     status: upstreamResponse.status,
     statusText: upstreamResponse.statusText,
-    headers: stripHopByHop(upstreamResponse.headers)
+    headers: responseHeaders
   });
 }
 
