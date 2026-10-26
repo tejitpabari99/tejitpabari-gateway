@@ -70,7 +70,7 @@ browser -> go.tejitpabari.com/<slug>  (Hosting `go`, rewrite ** -> /index.html)
 
 ## Risks / Open Questions
 - [RESOLVED: fire go_click unconditionally, no consent read] GA consent: the website gates GA behind a consent context (`ConsentContext`, `disableGa()`) `[verified: analytics.ts]`. `go.` has no banner. Default proposed: fire `go_click` unconditionally (no page content, no PII besides GA defaults). Owner confirm, else go. needs a consent read (cross-subdomain cookie) or must skip GA.
-- [OPEN, coordinate with SP05] App Check must NOT be enforced on Firestore (only on AI Logic), otherwise unauthenticated REST from `go.` returns 403. Add to SP05/SP06.
+- [RESOLVED: App Check enforced on AI Logic only; Firestore left unenforced (README + SP06 A8)] App Check must NOT be enforced on Firestore (only on AI Logic), otherwise unauthenticated REST from `go.` returns 403. Add to SP05/SP06.
 - [RESOLVED: ID found] GA4 ID `G-9NLS3NG63M`.
 - [RESOLVED: ignore] Query/hash passthrough, see D2.
 - [RESOLVED: page content] 404/410 are not HTTP statuses, see D1.
