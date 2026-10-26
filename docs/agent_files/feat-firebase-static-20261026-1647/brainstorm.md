@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 summary: Rebuild cc-gateway as a static SvelteKit SPA on Firebase Hosting (Spark plan) with Firestore, Google Auth, Gemini via Firebase AI Logic, and a static go. redirect page tracked in GA4.
 date: 2026-10-26
 ---
@@ -97,8 +97,8 @@ SSR; Cloud Functions/Blaze; real HTTP 301/302 for go.; in-app click counts; loca
 
 | Risk | Cheapest test |
 |---|---|
-| Firebase AI Logic free tier / Spark availability or App Check setup differs from assumption | Read current Firebase AI Logic docs + 10-line test call in emulator before porting rank |
+| Firebase AI Logic free tier / Spark availability or App Check setup differs from assumption | Owner accepts small cost: if Spark doesn't cover it, switch to Blaze (pay-as-you-go) with a budget alert; still no Cloud Functions. Verify with a 10-line test call before porting rank |
 | Gemini rank quality differs from Claude | Re-rank 3 known ideas, compare scores |
 | Firestore rules can't cleanly express "guest read allowed if settings toggle" (needs `get()` on settings per read) | Write rule + emulator test first; fallback: mirror toggles into a public `visibility` doc |
-| JS redirect latency/flash on go. noticeable | Measure on phone after deploy; upgrade path: Cloudflare Worker |
+| JS redirect latency/flash on go. noticeable (link-preview unfurl showing go. page explicitly accepted by owner) | Measure on phone after deploy; upgrade path: Cloudflare Worker |
 | Old VPS still answering during DNS switch | Lower TTL beforehand; verify via `curl -sI` after switch |
