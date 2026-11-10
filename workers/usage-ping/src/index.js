@@ -2,6 +2,7 @@ import { normalizePing } from './ingest.js';
 import { insertEvent } from './db.js';
 import { checkAuth, unauthorized } from './auth.js';
 import { queryStats } from './stats.js';
+import { renderStats, STATS_HEADERS } from './html.js';
 
 const TEXT = { 'Content-Type': 'text/plain; charset=utf-8' };
 const ROBOTS = 'User-agent: *\nAllow: /ping\n';
@@ -34,11 +35,7 @@ export default {
       }
       if (!(await checkAuth(request, env.STATS_PASSWORD))) return unauthorized();
       const stats = await queryStats(env.DB, { includeTest: url.searchParams.get('test') === '1' });
-      // HTML rendering arrives in Task 5.
-      return new Response(JSON.stringify(stats), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
-      });
+      return new Response(renderStats(stats), { status: 200, headers: STATS_HEADERS });
     }
 
     return new Response('Not found', { status: 404, headers: TEXT });
