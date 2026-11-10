@@ -14,6 +14,7 @@ export default defineWorkersConfig(async () => {
               TEST_MIGRATIONS: migrations,
               // Text of repo files for doc/CI checks (workers runtime has no fs).
               README_TEXT: readFileSync(path.join(import.meta.dirname, 'README.md'), 'utf8'),
+              WORKFLOW_TEXT: readFileSync(path.join(import.meta.dirname, '../../.github/workflows/usage-ping-ci.yml'), 'utf8'),
             } },
         },
       },
