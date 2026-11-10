@@ -27,27 +27,36 @@ SP2 and SP3 touch different repos, so run in parallel (max 2 agents).
 ## Locked decisions (short)
 
 - Worker `ping.tejitpabari.com`, D1, code in `workers/usage-ping/`; query-string `/ping` only; always `200 ok`.
-- Identity: org (mandatory, normalized) + `u_` + 8 hex uid; no names/emails; `@` in org: client rejects/re-asks, Worker redacts.
-- Per-batch events; `step_failed` only for setup failures; `mode=test` for sample/test runs.
-- No opt-out; notice + Terms/Privacy links; TERMS.md/PRIVACY.md in both repos.
-- `/stats`: Basic auth `admin` + secret `STATS_PASSWORD`, prod only by default, never raw rows.
-- Never store IP/UA text (only derived `client` category, country, UTC ts).
-- Plugin 0.3.0; script re-adds `script.external_request`.
+Theme: keep everything basic, minimal user friction, informing users is enough, no PII.
+
+- Worker `ping.tejitpabari.com`, D1, code in `workers/usage-ping/`; query-string `/ping` only; always `200 ok`.
+- Identity: org (mandatory, normalized) + `u_` + 8 hex uid; no names/emails; `@` in org: client rejects/re-asks, Worker redacts. Plugin uid from a tiny Python snippet (fallback: model makes up 8 hex); no `/new` endpoint.
+- Consent copy (plugin setup + script footer): "Your personal details stay anonymous. We collect your organization name." + Terms link. No opt-out. PRIVACY.md = plain list of what is collected, nothing else (no deletion process).
+- Funder headline = active orgs (>= 1 prod `batch_done`/`guide_started`), not people; uids still stored.
+- Per-batch events; `step_failed` for setup failures: plugin sends event + `step` only (max one per run), script also sends `reason`; `mode=test` for sample/test runs.
+- `origin` field (claude, google_script, gpt, gemini, grok, perplexity, other) replaces the derived `client` column; tools send it, Worker falls back to UA, else `other`.
+- Country dropped entirely. Never store IP/UA text.
+- Invisible fixes: n/ok/fail cap 5,000; `x_run` dedupe (real `run` column, unique `(uid,event,run)`, INSERT OR IGNORE); `ORGS_EXCLUDE` in `/stats`; stats count known origins + prod only by default.
+- `/stats`: Basic auth `admin` + secret `STATS_PASSWORD` (>= 24 random chars), never raw rows; robots.txt silent about it; Cloudflare rate-limit rule (manual).
+- No install tip for Claude Code; blocked address / permission prompt is ignored silently.
+- Plugin 0.3.0; script `VERSION = "0.1.1"`, re-adds `script.external_request`.
+- Real-world checks (plans, live script) are done by the owner, not in PRD acceptance criteria.
 
 ## /ping contract
 
-Owned by SP1: [01-usage-ping-worker/PRD.md](01-usage-ping-worker/PRD.md), section "/ping contract". SP2/SP3 build against it. Canonical PRIVACY data list lives there too. Cross-check done 2026-11-10: consistent.
+Owned by SP1: [01-usage-ping-worker/PRD.md](01-usage-ping-worker/PRD.md), section "/ping contract". SP2/SP3 build against it. Canonical PRIVACY data list lives there too. Updated 2026-11-10 for owner decisions (origin, x_run, no country/reason in plugin): consistent across SP1-SP3.
 
 ## Remaining [OPEN] items / risks
 
-- SP1: none blocking.
-- SP2: Claude Code CLI users may get a visible fetch-permission prompt; owner decides on a `docs/install.md` tip.
-- SP3: final TERMS/PRIVACY wording (owner reviews); `VERSION` initial value `"1.1.0"` (owner confirms).
-- Cross-cutting: models may skip pings (compare to known test runs); spam rows accepted; Terms/Privacy not legally reviewed; hung UrlFetch if Worker down; rate limiting/WAF deferred.
+- None blocking. Former opens resolved: install tip [RESOLVED: no tip, ignore silently]; script `VERSION` [RESOLVED: "0.1.1"]; TERMS/PRIVACY wording [RESOLVED: owner's notice copy, plain list].
+- Risks accepted: models may skip pings (compare to known test runs); spam rows accepted; Terms/Privacy not legally reviewed; hung UrlFetch if Worker down; rate limiting/WAF on `/ping` deferred.
 
 ## Owner manual steps
 
-1. `cd workers/usage-ping && npx wrangler secret put STATS_PASSWORD` (until set, `/stats` = 503).
-2. Redeploy Apps Script web app (new version) and re-authorize once, after SP1 is live and SP3 merged.
-3. Review Terms/Privacy wording in both repos; merge PRs to `main` so blob URLs resolve.
-4. Merge SP2 only after SP1 is live; rebuild plugin dist/marketplace.
+1. `cd workers/usage-ping && npx wrangler secret put STATS_PASSWORD` (>= 24 random chars; until set, `/stats` = 503).
+2. Cloudflare dashboard: add a rate-limit rule for `/stats` on `ping.tejitpabari.com`.
+3. Edit `ORGS_EXCLUDE` in `workers/usage-ping/src/config.js` with your test orgs.
+4. Redeploy Apps Script web app (new version), after SP1 is live and SP3 merged.
+5. Review Terms/Privacy wording in both repos; merge PRs to `main` so blob URLs resolve.
+6. Merge SP2 only after SP1 is live; rebuild plugin dist/marketplace.
+7. Do the real-world checks yourself (plugin on your plans/Claude Code/Gemini CLI, live script).

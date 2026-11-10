@@ -9,11 +9,11 @@ Repo/branch: tejit-np-auto (GitHub tejitpabari99/tejit-np-auto), new branch off 
 
 ## TL;DR
 
-Server-side `logUsage_()` in `code.gs` fires one GET to `https://ping.tejitpabari.com/ping` (UrlFetchApp, never throws) for: one `batch_done` per send batch (client reports aggregate counts once at loop end/stop via new `reportBatch`), one `batch_done mode=test n=1` per test email, and one `step_failed` per setup failure. A mandatory "Organization name" box at the top is saved to UserProperties with a random `u_xxxxxxxx` uid. Footer links Terms/Privacy. Never any email, name, recipient, subject or sheet name.
+Server-side `logUsage_()` in `code.gs` fires one GET to `https://ping.tejitpabari.com/ping` (UrlFetchApp, never throws, always `origin=google_script`) for: one `batch_done` per send batch (client reports aggregate counts once at loop end/stop via new `reportBatch`, with a random per-batch id sent as `x_run`), one `batch_done mode=test n=1` per test email, and one `step_failed` per setup failure. A mandatory "Organization name" box at the top is saved to UserProperties with a random `u_xxxxxxxx` uid. Footer shows the notice "Your personal details stay anonymous. We collect your organization name." plus Terms/Privacy links. `VERSION = "0.1.1"`. Never any email, name, recipient, subject or sheet name.
 
 ## Problem
 
-Owner needs anonymous proof that real orgs use the auto-emailer. Apps Script runs as each user, so no central log exists. Today the tool sends nothing off-Google [verified: `grep -n UrlFetchApp code.gs` → 0]; `script.external_request` was removed in the security pass, and a test asserts its absence [verified: `tests/security-server.test.js:65`]. Owner has not redeployed since, so one re-authorization covers both.
+Owner needs anonymous proof that real orgs use the auto-emailer. Apps Script runs as each user, so no central log exists. Today the tool sends nothing off-Google [verified: `grep -n UrlFetchApp code.gs` → 0]; `script.external_request` was removed in the security pass, and a test asserts its absence [verified: `tests/security-server.test.js:65`].
 
 ## Goals / Non-Goals
 
@@ -23,23 +23,23 @@ Non-goals: per-email/per-recipient data; reporting a batch whose tab is closed m
 
 ## Requirements
 
-**R1 Org box** — `index.html` top of the card, above step 1 (unnumbered so existing numbering stays): text input "Organization name" + helper line "Your organization's name, not your email. Used for anonymous usage counts (see Privacy)." Pre-filled on load from server. Trim, 1-100 chars, no `@`. Test Email and Send Emails are blocked (alert, same style as existing) until valid; first action of each is a save, then the real flow continues on its success.
+**R1 Org box** — `index.html` top of the card, above step 1 (unnumbered so existing numbering stays): text input "Organization name" + helper line "Your organization's name, not your email." Pre-filled on load from server. Trim, 1-100 chars, no `@`. Test Email and Send Emails are blocked (alert, same style as existing) until valid; first action of each is a save, then the real flow continues on its success.
 
 **R2 Persistence** — server fn saves org to `PropertiesService.getUserProperties()` (per Google user, per script, no new scope). Server re-normalizes (never trusts client). uid created once (`u_` + 8 lowercase hex from `Utilities.getUuid()`), stored in UserProperties, reused forever; invalid stored value → regenerated.
 
-**R3 Events** (SP1 enums/params; `tool_type=script`, `tool_name=auto-emailer`, `v=VERSION`, `org`, `uid`, random `t`):
+**R3 Events** (SP1 enums/params; `tool_type=script`, `tool_name=auto-emailer`, `v=VERSION` = `"0.1.1"`, `origin=google_script`, `org`, `uid`, random `t`, `x_run`):
 
 | Event | When | Params |
 |---|---|---|
-| `batch_done` | client send loop ends or stops (5 consecutive errors) | `mode=prod`, `n=ok+fail`, `ok`, `fail`, `x_stopped=1` only if stopped |
-| `batch_done` | `sendTestEmail` succeeds | `mode=test`, `n=1`, `ok=1`, `fail=0` |
-| `step_failed` | setup-stage failure, once per failing server call | `step` ∈ `load_sheet`\|`load_tab`\|`load_draft`\|`send`, `reason` enum |
+| `batch_done` | client send loop ends or stops (5 consecutive errors) | `mode=prod`, `n=ok+fail`, `ok`, `fail` (each clamped 0..5000), `x_stopped=1` only if stopped, `x_run` = random per-batch id made by the client once at loop start and passed to `reportBatch` |
+| `batch_done` | `sendTestEmail` succeeds | `mode=test`, `n=1`, `ok=1`, `fail=0`, `x_run` random (server-made) |
+| `step_failed` | setup-stage failure, once per failing server call | `step` ∈ `load_sheet`\|`load_tab`\|`load_draft`\|`send`, `reason` enum (script keeps reason; it is code), `x_run` random |
 
-Per-email failures are NOT `step_failed`; they are only the `fail` count. Skipped rows (conditional column TRUE) are excluded from n/ok/fail.
+Per-email failures are NOT `step_failed`; they are only the `fail` count. Skipped rows (conditional column TRUE) are excluded from n/ok/fail. `x_run` makes a double-reported batch a no-op at the Worker (unique `(uid, event, run)`); a missing/invalid client run id is replaced by a server random id.
 
 **R4 Never blocks or breaks** — failures swallowed, no UI mention, no retry. Org missing at ping time → ping sent without `org`.
 
-**R5 Legal** — footer "Terms · Privacy" (GitHub blob links on `main`, `target="_blank" rel="noopener noreferrer"`). `TERMS.md` + `PRIVACY.md` at repo root: plain language, owner Tejit Pabari, contact via GitHub issues, collected (copied exactly from SP1's canonical data list): tool version, event type, test-or-real flag, org name as typed, random code, counts, whether a send stopped early, error category, country, UTC time, kind of app (category only); never IP, raw user-agent text, emails, names, recipients, draft/sheet names; no opt-out; kept indefinitely; "not legal advice".
+**R5 Legal** — footer text "Your personal details stay anonymous. We collect your organization name." followed by links "Terms · Privacy" (GitHub blob links on `main`, `target="_blank" rel="noopener noreferrer"`). No other consent copy. `TERMS.md` + `PRIVACY.md` at repo root: plain language, owner Tejit Pabari. TERMS: free, as-is, use means accepting the usage counts, contact via GitHub issues. PRIVACY: only the plain list (copied exactly from SP1's canonical data list): tool version, event type, test-or-real flag, org name as typed, random code, counts, whether a send stopped early, error category, UTC time, run code, which app sent it (category only); never IP, country, raw user-agent text, emails, names, recipients, draft/sheet names. No deletion-request process, no hosting/retention/opt-out/funder text, no extra detail.
 
 **R6 Guide/README** — see Architecture §Docs.
 
@@ -49,7 +49,7 @@ Per-email failures are NOT `step_failed`; they are only the `fail` count. Skippe
 index.html ──google.script.run──► code.gs
   load: getUsageSettings()          → {org}            (pre-fill)
   test/send: saveOrganization(org)  → {org} → then sendTestEmail(...)/sendEmailBatch(...)  [signatures UNCHANGED]
-  loop end/stop: reportBatch(ok, fail, stopped)   fire-and-forget, no handlers
+  loop end/stop: reportBatch(ok, fail, stopped, runId)   fire-and-forget, no handlers; runId random, made once per loop
 code.gs
   logUsage_(event, fields, extra)  ──UrlFetchApp.fetch(url,{muteHttpExceptions:true})──► ping.tejitpabari.com/ping
   step_failed hooks: catch blocks of getRecentSheets/getPreviewData (load_sheet), getSheetTabs (load_tab),
@@ -58,22 +58,22 @@ code.gs
 
 **`logUsage_` safety design** (the PII firewall):
 - Signature `logUsage_(event, fields, extra)`. `event` must match `^[a-z0-9_]{1,50}$` else no-op.
-- `fields` is an **allowlist**: `mode` (test|prod), `n`/`ok`/`fail` (coerced to int 0..1,000,000, else dropped), `step` (local enum), `reason` (local enum, default `other`). Any other key dropped. Org, uid, v, tool_* come from code, never from caller.
-- `extra` keys must match `^x_[a-z0-9_]{1,28}$`; values only numbers/booleans (stringified) or `[a-z0-9_]{1,30}` strings; anything containing `@` or not matching is dropped. Free text (error messages, names) cannot pass.
-- URL built with `encodeURIComponent` on every key and value. Random `t` = 8 chars from `Utilities.getUuid()`. No custom User-Agent (default UA contains `Google-Apps-Script`, so SP1 derives `client=google-apps-script`).
+- `fields` is an **allowlist**: `mode` (test|prod), `n`/`ok`/`fail` (coerced to int 0..5,000, else dropped), `step` (local enum), `reason` (local enum, default `other`). Any other key dropped. Org, uid, v, tool_*, `origin=google_script` come from code, never from caller.
+- `extra` keys must match `^x_[a-z0-9_]{1,28}$`; values only numbers/booleans (stringified) or `[a-z0-9_]{1,30}` strings; anything containing `@` or not matching is dropped. Free text (error messages, names) cannot pass. `x_run` is added by `logUsage_` itself: the caller-supplied run id if it matches `^[a-z0-9]{8,32}$`, else 12 random chars from `Utilities.getUuid()`.
+- URL built with `encodeURIComponent` on every key and value. Random `t` = 8 chars from `Utilities.getUuid()`. No custom User-Agent (default UA contains `Google-Apps-Script`, a fallback for SP1; `origin=google_script` is sent explicitly).
 - Whole body in try/catch; logs only `console.warn('usage ping failed')`, no URL, no message text (URL contains org).
 
 **Reason mapping** `classifyReason_(error)`: tests lowercase message only locally; message is never sent. Order: `quota|too many times|limit exceeded` → `quota`; `permission|authoriz|access denied|not have access` → `no_access`; `not found|deleted|unable to open` → `not_found`; `invalid|required|exceeds|must be|no data` → `bad_input`; else `other`.
 
 **Latency/quota**: no ping inside `sendSingleEmail` (per-email path untouched). One fetch per batch (async from the client, UI already reset before the call) plus one per test/failure (inline, ~100-300 ms). UrlFetchApp has no timeout option [verified: Apps Script docs, advanced params are method/headers/payload/muteHttpExceptions/etc.]; worst case a hung endpoint delays a test/failure response. Quota 20k fetches/day consumer, far above need.
 
-**Client**: success and stop branches in `sendEmailsSequentially` call `google.script.run.reportBatch(reportOk, emailsFailed, stopped)` after the UI/button are reset. `reportOk` = successes excluding `result.skipped` (separate counter so on-screen "Sent" text is unchanged). Org value only ever assigned via `.value` (safe); any future HTML echo uses existing `escapeHtml`. `reportBatch` recomputes `n`, clamps ints, forces `mode=prod`.
+**Client**: success and stop branches in `sendEmailsSequentially` call `google.script.run.reportBatch(reportOk, emailsFailed, stopped, runId)` (runId = random id generated once when the loop starts) after the UI/button are reset. `reportOk` = successes excluding `result.skipped` (separate counter so on-screen "Sent" text is unchanged). Org value only ever assigned via `.value` (safe); any future HTML echo uses existing `escapeHtml`. `reportBatch` recomputes `n`, clamps ints to 0..5000, forces `mode=prod`.
 
 **Server guards**: `sendEmailBatch`/`sendTestEmail` throw "Organization name is required" if stored org is missing (defence in depth for direct calls). Existing positional params untouched, so old/new client mix is not an issue (HTML and server ship together).
 
 **Manifest**: add `https://www.googleapis.com/auth/script.external_request`; flip the existing assertion in `security-server.test.js:65` to require it (and keep the other scopes).
 
-**Docs**: `INSTALLATION_GUIDE.md`: new step text in Step 5 (org box) + `<!-- SCREENSHOT NEEDED: org-name-box -->` placeholder with "Picture coming soon" italic; permissions table row "Connect to an external service" → "Only used to send anonymous usage counts to ping.tejitpabari.com. Never your emails, drafts or sheet content."; Privacy section: replace "does not send your data to the developer" with an accurate list (what is sent, what never is, no opt-out, kept indefinitely, link to PRIVACY.md/TERMS.md); update the italic "Updated November 2026" line as the What-changed line (organization box, anonymous usage counts, one extra permission, re-authorize once). Root `README.md`: one line under the table noting anonymous usage counts + links to Terms/Privacy (table format and heading `Automations` untouched, plugin parses it).
+**Docs**: `INSTALLATION_GUIDE.md`: new step text in Step 5 (org box) + `<!-- SCREENSHOT NEEDED: org-name-box -->` placeholder with "Picture coming soon" italic; permissions table row "Connect to an external service" → "Only used to send anonymous usage counts to ping.tejitpabari.com. Never your emails, drafts or sheet content."; Privacy section: replace "does not send your data to the developer" with a short accurate list (what is sent, what never is, link to PRIVACY.md/TERMS.md; nothing more); update the italic "Updated November 2026" line as the What-changed line (organization box, anonymous usage counts, one extra permission). No re-authorization wording anywhere. Root `README.md`: one line under the table noting anonymous usage counts + links to Terms/Privacy (table format and heading `Automations` untouched, plugin parses it).
 
 ## Decisions
 
@@ -91,10 +91,15 @@ code.gs
 | 10 | Skipped rows | Excluded from counts | Count as ok | `n` = emails attempted |
 | 11 | Mid-send tab close | Not reported | Periodic partial pings | Accepted (brief #8); keeps one ping/batch |
 | 12 | Legal links | GitHub blob on `main` | Hosted page | Brief #16 |
+| 13 | Notice copy | Footer: "Your personal details stay anonymous. We collect your organization name." + Terms · Privacy links | Longer copy | Owner: basic, informing is enough |
+| 14 | `origin` | Always `google_script`, sent explicitly | UA-derived only | Owner decision; UA stays a fallback |
+| 15 | Dedupe | `x_run`: client random id per batch (server random for test/step_failed) | None | Invisible; Worker `INSERT OR IGNORE` |
+| 16 | `VERSION` | `"0.1.1"` | `"1.1.0"` | Owner confirmed |
+| 17 | Count cap | 0..5000 per count | 1,000,000 | Matches Worker |
 
 ## Manual steps
 
-- Owner: redeploy the Apps Script web app (new version) and re-authorize once (adds `script.external_request`; also applies security fixes). Not before SP1 `/ping` is live (pings fail silently until then, harmless).
+- Owner: redeploy the Apps Script web app (new version). Not before SP1 `/ping` is live (pings fail silently until then, harmless).
 - Owner: merge PR to `main` so Terms/Privacy blob URLs resolve before redeploy.
 
 ## Risks / Open Questions
@@ -104,19 +109,19 @@ code.gs
 - [RESOLVED: accepted] Tab closed mid-send loses the batch; two browsers/accounts = two uids.
 - [RESOLVED: `reportBatch` callable by any user from console; allowlist+clamping bounds it to self-spam] abuse.
 - [RESOLVED: server-only, uses existing `escapeHtml` for any HTML echo] XSS from org value.
-- [OPEN, non-blocking] Final wording of TERMS/PRIVACY (executor drafts per R5; owner reviews; not legal advice).
-- [OPEN, non-blocking] `VERSION` initial value: proposed `"1.1.0"` (owner to confirm).
+- [RESOLVED: executor drafts per R5 using the owner's notice wording; PRIVACY is a plain list only] Final wording of TERMS/PRIVACY.
+- [RESOLVED: `VERSION = "0.1.1"`] initial script version.
 - [DEFERRED] Throttling duplicate `step_failed` bursts; Worker down → hung UrlFetch.
 - Contract assumption: SP1 keeps `batch_done`, `step_failed`, `mode`, `reason` enums, `x_*` as extras, ignores `t`. If SP1 changes, update `logUsage_` constants only.
 
 ## Acceptance Criteria
 
-1. Node tests (`node --test auto-emailer/tests/*.test.js`), using fake `UrlFetchApp`/`PropertiesService` (+`Utilities.getUuid`) in `helpers.js`, assert: URL starts `https://ping.tejitpabari.com/ping?`, contains `tool_type=script&tool_name=auto-emailer`, `v`, `uid` matching `^u_[0-9a-f]{8}$`, `t`, all values encoded; `muteHttpExceptions:true`.
+1. Node tests (`node --test auto-emailer/tests/*.test.js`), using fake `UrlFetchApp`/`PropertiesService` (+`Utilities.getUuid`) in `helpers.js`, assert: URL starts `https://ping.tejitpabari.com/ping?`, contains `tool_type=script&tool_name=auto-emailer`, `origin=google_script`, `v=0.1.1`, `x_run`, `uid` matching `^u_[0-9a-f]{8}$`, `t`, all values encoded; `muteHttpExceptions:true`.
 2. No PII: for a run with user email, draft subject, sheet name, recipient addresses in fakes, no fetched URL contains any; disallowed `fields`/`extra` keys and values with `@` are dropped; `logs` never contain the URL.
 3. `UrlFetchApp.fetch` throwing → `logUsage_` returns normally; failing `getSheetTabs` still throws its original error; `sendTestEmail` still returns `{success:true,...}`.
 4. Org: `saveOrganization('  Red   Cross ')` stores `Red Cross`; empty, `a@b.org`, >100 chars (truncated/rejected per R1) handled; `getUsageSettings()` returns it; send/test throw "Organization name is required" when unset.
 5. uid created once, same on second call, regenerated if stored value malformed.
-6. Event tests: `sendTestEmail` → one `batch_done` `mode=test&n=1&ok=1&fail=0`; `reportBatch(8,2,true)` → `n=10&ok=8&fail=2&x_stopped=1&mode=prod`; `reportBatch(-5,'x')` clamped; setup failure → one `step_failed` with correct `step`/`reason`; `sendSingleEmail` makes zero fetches.
+6. Event tests: `sendTestEmail` → one `batch_done` `mode=test&n=1&ok=1&fail=0`; `reportBatch(8,2,true,'abcd1234efgh')` → `n=10&ok=8&fail=2&x_stopped=1&mode=prod&x_run=abcd1234efgh`; `reportBatch(-5,'x')` clamped and gets a server-made `x_run`; counts above 5000 clamped; setup failure → one `step_failed` with correct `step`/`reason`; `sendSingleEmail` makes zero fetches.
 7. Client test (existing `loadIndexScript`/`makeRun`): loop completion and 5-error stop each call `reportBatch` exactly once with right counts (skipped excluded); Test/Send without org do not call server send fns; org input pre-filled from `getUsageSettings`.
 8. `appsscript.json` contains `script.external_request` and all prior scopes; JSON valid; CI (`ci.yml`) green unchanged.
-9. `index.html` footer has Terms and Privacy links to the exact `main` blob URLs; `TERMS.md`, `PRIVACY.md` exist with the R5 content; guide has org step, permission row, updated privacy section, what-changed line, org-box screenshot placeholder; README has one line and its Automations table is unchanged.
+9. `index.html` footer has the text "Your personal details stay anonymous. We collect your organization name." and Terms and Privacy links to the exact `main` blob URLs; `VERSION` in `code.gs` is `"0.1.1"`; `TERMS.md`, `PRIVACY.md` exist with the R5 content; guide has org step, permission row, updated privacy section, what-changed line, org-box screenshot placeholder; README has one line and its Automations table is unchanged.
