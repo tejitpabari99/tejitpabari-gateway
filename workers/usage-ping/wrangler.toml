@@ -9,5 +9,5 @@ enabled = true
 [[d1_databases]]
 binding = "DB"
 database_name = "usage-ping-db"
-database_id = "REPLACE_WITH_DATABASE_ID_AT_DEPLOY"
+database_id = "898ead0c-a301-46ff-befa-37e133bd671b"
 migrations_dir = "migrations"
