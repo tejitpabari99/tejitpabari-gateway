@@ -1,0 +1,13 @@
+name = "usage-ping"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+routes = [{ pattern = "ping.tejitpabari.com", custom_domain = true }]
+
+[observability]
+enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "usage-ping-db"
+database_id = "898ead0c-a301-46ff-befa-37e133bd671b"
+migrations_dir = "migrations"
